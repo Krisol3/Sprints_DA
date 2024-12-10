@@ -8,14 +8,16 @@
 USE transactions;
 
 CREATE TABLE credit_card (
-	id VARCHAR(20) PRIMARY KEY,
+	id VARCHAR(15) PRIMARY KEY,
     iban VARCHAR(50) NOT NULL UNIQUE,
     pan VARCHAR (50),
     pin VARCHAR (4), 
     cvv VARCHAR (3),
-    expiring_date VARCHAR(20));
-    
-/*
+    expiring_date VARCHAR(20)
+   );
+
+
+
 -- Insertamos datos de credit_card
 INSERT INTO credit_card (id, iban, pan, pin, cvv, expiring_date) VALUES (        'CcU-2938', 'TR301950312213576817638661', '5424465566813633', '3257', '984', '10/30/22');
 INSERT INTO credit_card (id, iban, pan, pin, cvv, expiring_date) VALUES (        'CcU-2945', 'DO26854763748537475216568689', '5142423821948828', '9080', '887', '08/24/23');
@@ -292,7 +294,9 @@ INSERT INTO credit_card (id, iban, pan, pin, cvv, expiring_date) VALUES (       
 INSERT INTO credit_card (id, iban, pan, pin, cvv, expiring_date) VALUES (        'CcU-4842', 'SA2156708581957118818229', '3774 636724 83250', '4655', '750', '11/11/24');
 INSERT INTO credit_card (id, iban, pan, pin, cvv, expiring_date) VALUES (        'CcU-4849', 'SE2813123487163628531121', '5223363813491514', '9992', '779', '03/21/25');
 INSERT INTO credit_card (id, iban, pan, pin, cvv, expiring_date) VALUES (        'CcU-4856', 'TR373872558313545667124286', '349528235713651', '9086', '974', '05/19/23');
-*/
+
+
+ALTER TABLE transaction ADD CONSTRAINT credit_card_ibfk2 FOREIGN KEY (credit_card_id) REFERENCES credit_card(id);
 
 #Exercici 2
 #El departament de Recursos Humans ha identificat un error en el número de compte de l'usuari amb ID CcU-2938. 
@@ -365,8 +369,10 @@ ALTER TABLE credit_card ADD COLUMN fecha_actual DATE;
 #PAS 3. Eliminar l’atribut ‘website’ de la taula company. 
 ALTER TABLE company DROP COLUMN website; 
 
-
 #PAS 4. Creació de la taula data_user
+
+CREATE INDEX idx_user_id ON transaction(user_id);
+ 
 CREATE TABLE IF NOT EXISTS user (
         id INT PRIMARY KEY,
         name VARCHAR(100),
@@ -378,15 +384,14 @@ CREATE TABLE IF NOT EXISTS user (
         city VARCHAR(150),
         postal_code VARCHAR(100),
         address VARCHAR(255),
-        FOREIGN KEY(id) REFERENCES transaction(user_id) 
-);
-
-#Afegir l'índex un cop creada la taula
-CREATE INDEX idx_user_id ON transaction(user_id);
+        FOREIGN KEY(id) REFERENCES transaction(user_id)        
+    );
+    
+# Eliminar la FK existent a la taula user
+ALTER TABLE user DROP FOREIGN KEY user_ibfk_1;
 
 #Afegir les dades a la taula USER
-SET foreign_key_checks = 0;
-/*
+
 -- Insertamos datos de user
 INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) VALUES (        "1", "Zeus", "Gamble", "1-282-581-0551", "interdum.enim@protonmail.edu", "Nov 17, 1985",         "United States", "Lowell", "73544", "348-7818 Sagittis St.");
 INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) VALUES (        "2", "Garrett", "Mcconnell", "(718) 257-2412", "integer.vitae.nibh@protonmail.org", "Aug 23, 1992",         "United States", "Des Moines", "59464", "903 Sit Ave");
@@ -663,8 +668,12 @@ INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, po
 INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) VALUES (        "273", "Hilary", "Ferguson", "060-710-1604", "sapien.molestie.orci@google.edu", "Nov 3, 1981",         "Canada", "Pangnirtung", "12T 5G4", "Ap #736-4628 Cras St.");
 INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) VALUES (        "274", "Jameson", "Hunt", "024-732-2321", "fringilla@protonmail.com", "Jan 29, 1982",         "Canada", "Township of Minden Hills", "B6V 6N4", "224-4927 Praesent Ave");
 INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) VALUES (        "275", "Kenyon", "Hartman", "082-871-7248", "convallis.ante.lectus@yahoo.com", "Aug 3, 1982",         "Canada", "Richmond", "R8H 2K2", "8564 Facilisi. St.");
-*/
-SET foreign_key_checks = 1;
+
+# Afegir l'usuari del exercici anterior 1.3
+INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) VALUES (        "9999", "Unknown", "Unknown", "000-000-0000", "unknown@yahoo.com", "Aug 3, 1900",  "Unknown", "Unknown", "XXX XXX", "XXX Unknown");
+
+#Afegir el FK entre transaction i user
+ALTER TABLE transaction ADD FOREIGN KEY (user_id) REFERENCES user(id);
 
 #Modificar el nom de la taula USER per data_user
 ALTER TABLE user RENAME data_user;
@@ -682,7 +691,7 @@ ALTER TABLE data_user RENAME COLUMN email TO personal_email;
 #Assegura't d'incloure informació rellevant de totes dues taules i utilitza àlies per a canviar de nom columnes segons sigui necessari.
 #Mostra els resultats de la vista, ordena els resultats de manera descendent en funció de la variable ID de transaction.
 
-#CREATE VIEW InformeTecnico AS
+CREATE VIEW InformeTecnico AS
 SELECT t.id AS id_transaction, du.name, du.surname, c.company_name, cd.iban
 FROM transaction AS t
 LEFT JOIN data_user AS du
@@ -695,3 +704,4 @@ ORDER BY t.id DESC;
 
 SELECT * 
 FROM InformeTecnico;
+
